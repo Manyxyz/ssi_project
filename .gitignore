@@ -1,5 +1,6 @@
 *.csv
-
+.vscode/
+__pycache__/
 wine+quality/
 
-**/settings.json
+*.code-workspace
