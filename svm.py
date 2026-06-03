@@ -6,6 +6,8 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, classification_report, log_loss
 from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 from sklearn.preprocessing import label_binarize
+from joblib import dump
+
 
 def load_wine_data(wine_type):
     X_train = pd.read_csv(f"X_train_{wine_type}_clean.csv")
@@ -92,6 +94,21 @@ def process_and_evaluate(wine_type):
     print(f"Log loss (Sigmoid):   {log_loss(y_test, y_prob_sig, labels=[0,1,2]):.4f}")
     print(f"Log loss (Isotonic):  {log_loss(y_test, y_prob_iso, labels=[0,1,2]):.4f}")
 
+    # wybierz najlepszą kalibrację według log-loss i zapisz model
+    loss_sig = log_loss(y_test, y_prob_sig, labels=[0,1,2])
+    loss_iso = log_loss(y_test, y_prob_iso, labels=[0,1,2])
+
+    if loss_sig <= loss_iso:
+        best_calib = "sigmoid"
+        best_calibrated = calibrated_sig
+    else:
+        best_calib = "isotonic"
+        best_calibrated = calibrated_iso
+
+    os.makedirs("models", exist_ok=True)
+    dump(best_calibrated, f"models/svm_{wine_type}_{best_calib}.joblib")
+    dump(best_svm, f"models/svm_{wine_type}_uncalibrated.joblib")
+    print(f"Zapisano: models/svm_{wine_type}_{best_calib}.joblib")
     # Krzywe kalibracji
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.plot([0, 1], [0, 1], "k:", label="Idealnie skalibrowany")
