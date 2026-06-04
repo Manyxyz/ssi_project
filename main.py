@@ -2,6 +2,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from joblib import dump
+import os
 
 def prepare_group(csv_path, prefix):
     df = pd.read_csv(csv_path, sep=';')
@@ -45,6 +47,9 @@ def prepare_group(csv_path, prefix):
     X_test_scaled.to_csv(f'X_test_{prefix}.csv', index=False)
     y_train.to_csv(f'y_train_{prefix}.csv', index=False)
     y_test.to_csv(f'y_test_{prefix}.csv', index=False)
+
+    os.makedirs('models', exist_ok=True)
+    dump(scaler, f'models/scaler_{prefix}.joblib')
 
     print(f"{prefix.upper()} data prepared and saved")
 
